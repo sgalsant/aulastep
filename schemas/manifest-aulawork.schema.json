@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aulastep.dev/schemas/manifest-aulawork.schema.json",
+  "title": "AulaStep · manifest.json de un paquete .aulawork",
+  "type": "object",
+  "required": ["format", "schemaVersion", "activity", "exportedAt", "integrity"],
+  "properties": {
+    "format": { "const": "aulawork" },
+    "schemaVersion": { "type": "string" },
+    "generator": {
+      "type": "object",
+      "properties": { "name": { "type": "string" }, "version": { "type": "string" } }
+    },
+    "activity": {
+      "type": "object",
+      "required": ["id", "version"],
+      "properties": {
+        "id": { "type": "string" },
+        "version": { "type": "string" },
+        "titulo": { "type": "string" }
+      }
+    },
+    "exportedAt": { "type": "string", "format": "date-time" },
+    "integrity": {
+      "type": "object",
+      "required": ["algorithm", "files"],
+      "properties": {
+        "algorithm": { "const": "SHA-256" },
+        "files": {
+          "type": "object",
+          "additionalProperties": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    }
+  }
+}

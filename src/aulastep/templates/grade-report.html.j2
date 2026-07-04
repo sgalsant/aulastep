@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }} · {{ activity.titulo }}</title>
+<style>
+  :root {
+    --bg: #f2f6f8; --surface: #fff; --surface-2: #e6eef2;
+    --text: #16323c; --muted: #46626e; --primary: #1f4e5f; --accent: #0e7c86;
+    --border: #c3d4db; --ok: #1a7f4b; --bad: #b3382c; --warn: #9a6a00;
+    --font-mono: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.55 -apple-system, "Segoe UI", system-ui, Roboto, sans-serif; }
+  .wrap { max-width: 62rem; margin: 0 auto; padding: 2.5rem 1.2rem 4rem; }
+  .brand { font-family: var(--font-mono); font-size: .74rem; letter-spacing: .12em;
+           text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  .brand::before { content: "▸ "; }
+  h1 { font-size: 1.7rem; letter-spacing: -.02em; margin: .2rem 0 .1rem; }
+  .sub { color: var(--muted); margin: 0 0 1.8rem; font-family: var(--font-mono); font-size: .8rem; }
+  h2 { font-size: 1.15rem; margin: 2.2rem 0 .6rem; }
+  table { border-collapse: collapse; width: 100%; background: var(--surface);
+          border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  th, td { border-bottom: 1px solid var(--border); padding: .5rem .7rem; text-align: left; }
+  th { background: var(--surface-2); font-family: var(--font-mono); font-size: .68rem;
+       letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  td.num, th.num { text-align: right; font-family: var(--font-mono); font-size: .85rem; }
+  tr:last-child td { border-bottom: 0; }
+  a { color: var(--accent); }
+  .pill { display: inline-block; font-family: var(--font-mono); font-size: .72rem;
+          font-weight: 700; border-radius: 99px; padding: .1rem .6rem; }
+  .pill.ok   { color: var(--ok);   background: #1a7f4b18; }
+  .pill.bad  { color: var(--bad);  background: #b3382c15; }
+  .pill.warn { color: var(--warn); background: #9a6a0015; }
+  /* Barra de navegación entre alumnos (estilo panel de calificación) */
+  .student-nav { position: sticky; top: .5rem; z-index: 20;
+                 display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+                 background: var(--surface); border: 1px solid var(--border);
+                 border-radius: 10px; padding: .45rem .6rem; margin: 0 0 1rem;
+                 box-shadow: 0 2px 10px rgba(22,50,60,.08); }
+  .nav-btn { font: inherit; font-size: .82rem; font-weight: 600; cursor: pointer;
+             color: var(--primary); background: var(--surface-2);
+             border: 1px solid var(--border); border-radius: 6px;
+             padding: .32rem .7rem; text-decoration: none; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn:disabled { opacity: .45; cursor: not-allowed; }
+  #nav-alumnos { flex: 1; min-width: 12rem; font: inherit; font-size: .85rem;
+                 padding: .32rem .5rem; border: 1px solid var(--border);
+                 border-radius: 6px; background: var(--surface); color: var(--text); }
+  .nav-count { font-family: var(--font-mono); font-size: .74rem; color: var(--muted); white-space: nowrap; }
+  .student { scroll-margin-top: 4.2rem; }
+  /* Detalle por alumno */
+  .student { background: var(--surface); border: 1px solid var(--border);
+             border-left: 4px solid var(--accent); border-radius: 10px;
+             padding: 1.2rem 1.4rem; margin: 1.2rem 0; }
+  .student header { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; align-items: baseline;
+                    border-bottom: 2px solid var(--border); padding-bottom: .6rem; margin-bottom: .8rem; }
+  .student h3 { margin: 0; font-size: 1.15rem; }
+  .student .meta { font-family: var(--font-mono); font-size: .74rem; color: var(--muted); }
+  .stepname { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .1em;
+              text-transform: uppercase; color: var(--accent); margin: 1.1rem 0 .3rem; font-weight: 700; }
+  .item { border: 1px solid var(--border); border-radius: 8px; padding: .6rem .85rem; margin: .45rem 0; }
+  .item .head { display: flex; gap: .6rem; align-items: baseline; flex-wrap: wrap; }
+  .kind { font-family: var(--font-mono); font-size: .66rem; letter-spacing: .1em;
+          text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .prompt { color: var(--muted); font-size: .9rem; }
+  .prompt > p { margin: .25rem 0; }
+  blockquote { margin: .4rem 0; padding: .4rem .8rem; border-left: 3px solid var(--border);
+               background: var(--surface-2); border-radius: 0 6px 6px 0; white-space: pre-wrap; }
+  .opt { font-size: .9rem; margin: .15rem 0 .15rem 1rem; }
+  .opt .mark { font-family: var(--font-mono); font-weight: 700; }
+  .opt.given-ok .mark { color: var(--ok); }
+  .opt.given-bad .mark { color: var(--bad); }
+  .opt.expected { color: var(--ok); }
+  .thumb { max-width: 220px; max-height: 150px; border: 1px solid var(--border);
+           border-radius: 6px; display: block; margin: .3rem 0; }
+  .desc { font-size: .85rem; color: var(--muted); font-style: italic; }
+  footer { margin-top: 2.5rem; text-align: center; font-family: var(--font-mono);
+           font-size: .72rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 1rem; }
+  @media print {
+    body { background: #fff; }
+    .student { break-inside: avoid; box-shadow: none; }
+    .student-nav { display: none; }
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="brand">{{ app_name }} · corrección</p>
+  <h1>{{ title }}</h1>
+  <p class="sub">{{ activity.titulo }} · v{{ activity.version }} · generado el {{ generated_at }}</p>
+
+  <h2 id="resumen">Resumen ({{ rows|length }} entregas)</h2>
+  <table>
+    <thead>
+      <tr>
+        {% for f in student_fields %}<th>{{ field_labels[f] }}</th>{% endfor %}
+        <th class="num">Obligatorios</th>
+        <th class="num">Elección</th>
+        <th class="num">Duración</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}{% set w = r.work %}{% set g = r.grade %}{% set ridx = loop.index0 %}
+      <tr>
+        {% for f in student_fields %}
+        <td>
+          {%- if loop.first -%}
+            {%- set label = w.student.get(f, "") or w.filename -%}
+            {%- if g %}<a href="#entrega-{{ ridx }}">{{ label }}</a>{% else %}{{ label }}{% endif -%}
+          {%- else -%}{{ w.student.get(f, "") }}{%- endif -%}
+        </td>
+        {% endfor %}
+        {% if g %}
+        <td class="num">{{ g.required_done }}/{{ g.required_total }} ({{ g.required_pct }}%)</td>
+        <td class="num">{{ g.choice_hits }}/{{ g.choice_total }}</td>
+        <td class="num">{% if g.duration_min is not none %}{{ g.duration_min }} min{% endif %}</td>
+        <td>
+          {% if w.warnings %}<span class="pill warn">{{ w.warnings|join(" · ") }}</span>
+          {% else %}<span class="pill ok">OK</span>{% endif %}
+        </td>
+        {% else %}
+        <td class="num">—</td><td class="num">—</td><td class="num">—</td>
+        <td><span class="pill bad">Inválida: {{ w.errors|join(" ") }}</span></td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Detalle por alumno</h2>
+
+  <nav class="student-nav" aria-label="Navegación entre alumnos">
+    <a class="nav-btn" href="#resumen" title="Volver a la tabla resumen">↑ Resumen</a>
+    <button class="nav-btn" type="button" id="nav-prev" aria-label="Alumno anterior">← Anterior</button>
+    <select id="nav-alumnos" aria-label="Ir a un alumno">
+      {% for r in rows %}{% if r.grade %}
+      <option value="entrega-{{ loop.index0 }}">{{ r.work.student.values()|select|join(" · ") or r.work.filename }}</option>
+      {% endif %}{% endfor %}
+    </select>
+    <button class="nav-btn" type="button" id="nav-next" aria-label="Alumno siguiente">Siguiente →</button>
+    <span class="nav-count" id="nav-count" aria-live="polite"></span>
+  </nav>
+
+  {% for r in rows %}{% set w = r.work %}{% set g = r.grade %}
+  {% if g %}
+  <section class="student" id="entrega-{{ loop.index0 }}">
+    <header>
+      <h3>{{ w.student.values()|select|join(" · ") or w.filename }}</h3>
+      <span class="meta">{{ w.filename }}</span>
+      <span class="meta">
+        {% if g.started %}inicio {{ g.started.strftime("%d/%m %H:%M") }}{% endif %}
+        {% if g.last %} · última {{ g.last.strftime("%d/%m %H:%M") }}{% endif %}
+        {% if g.duration_min is not none %} · {{ g.duration_min }} min{% endif %}
+      </span>
+      <span class="pill {{ 'ok' if g.required_pct == 100 else 'warn' }}">
+        obligatorios {{ g.required_pct }}%
+      </span>
+      {% if g.choice_total %}
+      <span class="pill {{ 'ok' if g.choice_hits == g.choice_total else 'warn' }}">
+        elección {{ g.choice_hits }}/{{ g.choice_total }}
+      </span>
+      {% endif %}
+    </header>
+
+    {% set ns = namespace(step=None) %}
+    {% for it in g["items"] %}
+      {% if it.step_id != ns.step %}
+        {% set ns.step = it.step_id %}
+        <p class="stepname">{{ it.step_titulo }}</p>
+      {% endif %}
+      <div class="item">
+        <div class="head">
+          <span class="kind">{{ it.type }}{% if it.required %} · obligatorio{% endif %}</span>
+          {% if it.options is defined %}
+            <span class="pill {{ 'ok' if it.correct else 'bad' }}">{{ "✓ correcta" if it.correct else ("✗ incorrecta" if it.answered else "sin responder") }}</span>
+          {% elif it.done %}
+            <span class="pill ok">✓</span>
+          {% else %}
+            <span class="pill bad">pendiente</span>
+          {% endif %}
+        </div>
+        {% if it.prompt_html %}<div class="prompt">{{ it.prompt_html|safe }}</div>{% endif %}
+
+        {% if it.options is defined %}
+          {% for oid, ohtml in it.options.items() %}
+            {% set was_given = oid in it.given %}
+            {% set is_expected = oid in it.expected %}
+            <div class="opt {{ 'given-ok' if was_given and is_expected else ('given-bad' if was_given else ('expected' if is_expected else '')) }}">
+              <span class="mark">{% if was_given %}[{{ '✓' if is_expected else '✗' }}]{% elif is_expected %}[=]{% else %}[ ]{% endif %}</span>
+              {{ ohtml|safe }}
+            </div>
+          {% endfor %}
+        {% elif it.text_value is defined %}
+          {% if it.text_value %}<blockquote>{{ it.text_value }}</blockquote>
+          {% else %}<p class="desc">Sin respuesta.</p>{% endif %}
+        {% elif it.attachments is defined %}
+          {% for att in it.attachments %}
+            {% set rel = r.paths.get(att.path) %}
+            {% if rel %}
+              {% if att.mime and att.mime.startswith("image/") %}
+                <a href="{{ rel }}"><img class="thumb" src="{{ rel }}" alt="{{ att.name }}"></a>
+              {% else %}
+                <p><a href="{{ rel }}">{{ att.name }}</a> ({{ att.mime }})</p>
+              {% endif %}
+              {% if att.description %}<p class="desc">«{{ att.description }}»</p>{% endif %}
+            {% endif %}
+          {% else %}
+            <p class="desc">Sin archivo adjunto.</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+    {% endfor %}
+  </section>
+  {% endif %}
+  {% endfor %}
+
+  <footer>Generado con {{ app_name }} v{{ app_version }} · las marcas [=] señalan la opción esperada no elegida</footer>
+</main>
+<script>
+(function () {
+  "use strict";
+  var sections = Array.prototype.slice.call(document.querySelectorAll("section.student"));
+  var select = document.getElementById("nav-alumnos");
+  var prev = document.getElementById("nav-prev");
+  var next = document.getElementById("nav-next");
+  var count = document.getElementById("nav-count");
+  if (!sections.length || !select) return;
+
+  var current = 0;
+  function paint() {
+    select.selectedIndex = current;
+    count.textContent = (current + 1) + " / " + sections.length;
+    prev.disabled = current === 0;
+    next.disabled = current === sections.length - 1;
+  }
+  function go(index, scroll) {
+    current = Math.max(0, Math.min(sections.length - 1, index));
+    paint();
+    if (scroll !== false) sections[current].scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  prev.addEventListener("click", function () { go(current - 1); });
+  next.addEventListener("click", function () { go(current + 1); });
+  select.addEventListener("change", function () { go(select.selectedIndex); });
+  // Flechas del teclado (fuera de campos de formulario), como en Moodle.
+  document.addEventListener("keydown", function (e) {
+    if (e.target.closest("select, input, textarea")) return;
+    if (e.key === "ArrowRight") { go(current + 1); e.preventDefault(); }
+    if (e.key === "ArrowLeft") { go(current - 1); e.preventDefault(); }
+  });
+  // Al hacer scroll manual o llegar desde la tabla, la barra se sincroniza sola.
+  if ("IntersectionObserver" in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) { current = sections.indexOf(entry.target); paint(); }
+      });
+    }, { rootMargin: "-20% 0px -70% 0px" });
+    sections.forEach(function (s) { observer.observe(s); });
+  }
+  paint();
+})();
+</script>
+</body>
+</html>

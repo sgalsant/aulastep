@@ -1,0 +1,56 @@
+schema_version: "1.0"
+
+actividad:
+  id: dhcp-kea-ubuntu
+  titulo: Servidor DHCP con Kea en Ubuntu Server 24.04
+  subtitulo: Despliegue y verificación en red local
+  version: 1.2.0
+  descripcion: >
+    Instalarás y configurarás un servidor DHCP con Kea sobre Ubuntu Server
+    24.04, definirás un ámbito para la red del aula y comprobarás desde un
+    cliente que la asignación dinámica de direcciones funciona correctamente.
+  autor: Santiago Galván Sánchez
+  modulo: Servicios en Red
+  curso: 2º SMR
+  duracion_minutos: 110
+  tema: oceano
+  licencia:
+    nombre: CC BY-NC-SA 4.0
+    nombre_completo: Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional
+    url: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es
+
+navegacion:
+  modo: asistente
+  permitir_anterior: true
+  permitir_saltar: true
+  mostrar_indice: true
+  mostrar_progreso: true
+  exigir_obligatorios_para_avanzar: false
+
+alumno:
+  campos:
+    - id: nombre
+      etiqueta: Nombre y apellidos
+      tipo: texto
+      obligatorio: true
+    - id: grupo
+      etiqueta: Grupo
+      tipo: texto
+      obligatorio: true
+    - id: puesto
+      etiqueta: Puesto o equipo del aula
+      tipo: texto
+      obligatorio: false
+
+trabajo:
+  autoguardado: true
+  intervalo_autoguardado_segundos: 5
+  permitir_exportar: true
+  permitir_importar: true
+  extension: aulawork
+  patron_nombre: "{actividad}_{alumno}_{fecha}.aulawork"
+
+limites:
+  tamano_maximo_captura_mb: 8
+  tamano_maximo_adjunto_mb: 20
+  tamano_maximo_paquete_mb: 100

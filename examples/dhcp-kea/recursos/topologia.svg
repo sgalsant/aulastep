@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240" font-family="system-ui, sans-serif" role="img" aria-label="Topología: servidor Kea y cliente unidos por un switch en la red 192.168.50.0/24">
+  <rect width="640" height="240" fill="#f2f6f8"/>
+  <text x="320" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#16323c">Red del aula · 192.168.50.0/24</text>
+  <rect x="40" y="70" width="180" height="100" rx="10" fill="#1f4e5f"/>
+  <text x="130" y="105" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Ubuntu Server 24.04</text>
+  <text x="130" y="126" text-anchor="middle" font-size="12" fill="#cfe6ee">kea-dhcp4-server</text>
+  <text x="130" y="148" text-anchor="middle" font-size="12" font-family="monospace" fill="#8fd8cf">192.168.50.10 (estática)</text>
+  <rect x="270" y="95" width="100" height="50" rx="8" fill="#0e7c86"/>
+  <text x="320" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Switch</text>
+  <rect x="420" y="70" width="180" height="100" rx="10" fill="#46626e"/>
+  <text x="510" y="105" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Cliente</text>
+  <text x="510" y="126" text-anchor="middle" font-size="12" fill="#dbe8ee">Ubuntu / Windows</text>
+  <text x="510" y="148" text-anchor="middle" font-size="12" font-family="monospace" fill="#a8e6de">IP dinámica .100–.150</text>
+  <line x1="220" y1="120" x2="270" y2="120" stroke="#16323c" stroke-width="3"/>
+  <line x1="370" y1="120" x2="420" y2="120" stroke="#16323c" stroke-width="3"/>
+  <text x="320" y="200" text-anchor="middle" font-size="12" fill="#46626e">Puerta de enlace 192.168.50.1 · DNS 1.1.1.1 / 8.8.8.8 · dominio aula.local</text>
+</svg>

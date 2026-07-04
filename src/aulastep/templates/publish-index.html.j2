@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }}</title>
+<style>
+  :root {
+    --bg: #f2f6f8; --surface: #ffffff; --surface-2: #e6eef2;
+    --text: #16323c; --muted: #46626e; --primary: #1f4e5f;
+    --accent: #0e7c86; --border: #c3d4db; --radius: 10px;
+    --font-mono: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.6 -apple-system, "Segoe UI", system-ui, Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 52rem; margin: 0 auto; padding: 3rem 1.2rem 4rem; }
+  .brand {
+    font-family: var(--font-mono); font-size: .78rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 1.2rem;
+  }
+  .brand::before { content: "▸ "; }
+  h1 { font-size: clamp(1.7rem, 1.4rem + 1.4vw, 2.3rem); letter-spacing: -.02em; margin: 0 0 .3rem; }
+  .lead { color: var(--muted); margin: 0 0 2.2rem; }
+  .card {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 4px solid var(--accent); border-radius: var(--radius);
+    padding: 1.1rem 1.3rem; margin: 0 0 1rem;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .card:hover { border-color: var(--accent); box-shadow: 0 1px 2px rgba(22,50,60,.08), 0 4px 14px rgba(22,50,60,.07); }
+  .card h2 { margin: 0 0 .15rem; font-size: 1.2rem; letter-spacing: -.01em; }
+  .card .sub { color: var(--muted); margin: 0 0 .55rem; }
+  .meta {
+    display: flex; flex-wrap: wrap; gap: .4rem 1rem;
+    font-family: var(--font-mono); font-size: .74rem; letter-spacing: .04em; color: var(--muted);
+  }
+  .meta span::before { content: "· "; color: var(--accent); }
+  footer {
+    margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border);
+    font-family: var(--font-mono); font-size: .72rem; color: var(--muted); text-align: center;
+  }
+  footer a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="brand">{{ app_name }}</p>
+  <h1>{{ title }}</h1>
+  <p class="lead">Elige una actividad para empezar o continuar tu trabajo.</p>
+
+  {% for e in entries %}
+  <a class="card" href="{{ e.id }}/">
+    <h2>{{ e.titulo }}</h2>
+    {% if e.subtitulo %}<p class="sub">{{ e.subtitulo }}</p>{% endif %}
+    <div class="meta">
+      {% if e.modulo %}<span>{{ e.modulo }}</span>{% endif %}
+      {% if e.curso %}<span>{{ e.curso }}</span>{% endif %}
+      <span>{{ e.pasos }} pasos</span>
+      {% if e.duracion %}<span>{{ e.duracion }} min</span>{% endif %}
+      <span>v{{ e.version }}</span>
+      {% if e.licencia and e.licencia.nombre %}<span>{{ e.licencia.nombre }}</span>{% endif %}
+    </div>
+  </a>
+  {% endfor %}
+
+  <footer>
+    Generado con {{ app_name }} v{{ app_version }}
+    {% if entries and entries[0].licencia %}
+      · Contenidos con la licencia indicada en cada actividad
+    {% endif %}
+  </footer>
+</main>
+</body>
+</html>

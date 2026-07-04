@@ -1,0 +1,148 @@
+/* AulaStep · Temas visuales.
+   Cada tema define únicamente tokens; styles.css los consume.
+   Todos los pares texto/fondo cumplen contraste WCAG AA. */
+
+:root,
+[data-theme="oceano"] {
+  --c-bg: #f2f6f8;
+  --c-surface: #ffffff;
+  --c-surface-2: #e6eef2;
+  --c-text: #16323c;
+  --c-text-muted: #46626e;
+  --c-primary: #1f4e5f;
+  --c-primary-strong: #143845;
+  --c-primary-contrast: #ffffff;
+  --c-accent: #0e7c86;
+  --c-border: #c3d4db;
+  --c-success: #1a7a4a;
+  --c-warning: #8a5a00;
+  --c-danger: #b3261e;
+  --c-info: #145da8;
+  --c-code-bg: #10262e;
+  --c-code-text: #d4ecf2;
+  --c-progress: #0e7c86;
+  --c-active: #1f4e5f;
+  --c-done: #1a7a4a;
+  --focus-ring: #0e7c86;
+  --shadow: 0 1px 2px rgba(22, 50, 60, .08), 0 4px 14px rgba(22, 50, 60, .07);
+}
+
+[data-theme="bosque"] {
+  --c-bg: #f4f6ef;
+  --c-surface: #fffef9;
+  --c-surface-2: #e8eddd;
+  --c-text: #1f2e20;
+  --c-text-muted: #4c5f4e;
+  --c-primary: #2d5a3d;
+  --c-primary-strong: #1e4029;
+  --c-primary-contrast: #ffffff;
+  --c-accent: #157a54;
+  --c-border: #c9d4bd;
+  --c-success: #157a54;
+  --c-warning: #7c5a10;
+  --c-danger: #a83232;
+  --c-info: #23617a;
+  --c-code-bg: #1c2a1e;
+  --c-code-text: #d9ead9;
+  --c-progress: #157a54;
+  --c-active: #2d5a3d;
+  --c-done: #157a54;
+  --focus-ring: #157a54;
+  --shadow: 0 1px 2px rgba(31, 46, 32, .08), 0 4px 14px rgba(31, 46, 32, .07);
+}
+
+[data-theme="indigo"] {
+  --c-bg: #f4f3fa;
+  --c-surface: #ffffff;
+  --c-surface-2: #e9e6f6;
+  --c-text: #26224a;
+  --c-text-muted: #55507d;
+  --c-primary: #443c8f;
+  --c-primary-strong: #322c6d;
+  --c-primary-contrast: #ffffff;
+  --c-accent: #6d5bd0;
+  --c-border: #cfc9e8;
+  --c-success: #1d7a52;
+  --c-warning: #86570a;
+  --c-danger: #b3261e;
+  --c-info: #4553c4;
+  --c-code-bg: #1e1b38;
+  --c-code-text: #dfdaf5;
+  --c-progress: #6d5bd0;
+  --c-active: #443c8f;
+  --c-done: #1d7a52;
+  --focus-ring: #6d5bd0;
+  --shadow: 0 1px 2px rgba(38, 34, 74, .08), 0 4px 14px rgba(38, 34, 74, .08);
+}
+
+[data-theme="ambar"] {
+  --c-bg: #faf5ec;
+  --c-surface: #fffdf7;
+  --c-surface-2: #f2e8d4;
+  --c-text: #3a2c14;
+  --c-text-muted: #6c5a3a;
+  --c-primary: #9a5b13;
+  --c-primary-strong: #74430c;
+  --c-primary-contrast: #ffffff;
+  --c-accent: #b4700f;
+  --c-border: #e0d0b0;
+  --c-success: #23713f;
+  --c-warning: #8a5a00;
+  --c-danger: #ad2a1a;
+  --c-info: #2b628f;
+  --c-code-bg: #2c2211;
+  --c-code-text: #f0e3c6;
+  --c-progress: #b4700f;
+  --c-active: #9a5b13;
+  --c-done: #23713f;
+  --focus-ring: #9a5b13;
+  --shadow: 0 1px 2px rgba(58, 44, 20, .09), 0 4px 14px rgba(58, 44, 20, .07);
+}
+
+[data-theme="grafito"] {
+  --c-bg: #14181c;
+  --c-surface: #1d2329;
+  --c-surface-2: #262e36;
+  --c-text: #edf2f5;
+  --c-text-muted: #9fb0bb;
+  --c-primary: #37414b;
+  --c-primary-strong: #2a323a;
+  --c-primary-contrast: #f2f7fa;
+  --c-accent: #35c3d6;
+  --c-border: #39444f;
+  --c-success: #4cc38a;
+  --c-warning: #e2b93b;
+  --c-danger: #f0716a;
+  --c-info: #64b3f4;
+  --c-code-bg: #0d1114;
+  --c-code-text: #cbe6ee;
+  --c-progress: #35c3d6;
+  --c-active: #35c3d6;
+  --c-done: #4cc38a;
+  --focus-ring: #35c3d6;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 4px 16px rgba(0, 0, 0, .3);
+}
+
+[data-theme="coral"] {
+  --c-bg: #faf2ef;
+  --c-surface: #fffbf9;
+  --c-surface-2: #f4e3dc;
+  --c-text: #43201a;
+  --c-text-muted: #74504a;
+  --c-primary: #a8402f;
+  --c-primary-strong: #832f22;
+  --c-primary-contrast: #ffffff;
+  --c-accent: #c05a3c;
+  --c-border: #e6cdc3;
+  --c-success: #1f7a4d;
+  --c-warning: #8a5410;
+  --c-danger: #8f1d3c;
+  --c-info: #2f5f96;
+  --c-code-bg: #331913;
+  --c-code-text: #f4ddd4;
+  --c-progress: #c05a3c;
+  --c-active: #a8402f;
+  --c-done: #1f7a4d;
+  --focus-ring: #a8402f;
+  --shadow: 0 1px 2px rgba(67, 32, 26, .08), 0 4px 14px rgba(67, 32, 26, .07);
+}

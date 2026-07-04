@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="{{ tema }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{{ descripcion }}">
+  <meta name="generator" content="{{ app_name }} {{ app_version }}">
+  {% if base_url %}<base href="{{ base_url }}">{% endif %}
+  <title>{{ titulo }}{% if subtitulo %} · {{ subtitulo }}{% endif %} — {{ app_name }}</title>
+  <link rel="stylesheet" href="assets/themes.css">
+  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f4e5f'/%3E%3Cpath d='M8 22 L14 10 L20 22 M11 18h6' stroke='%23fff' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='24' cy='12' r='2.4' fill='%2360d3c8'/%3E%3C/svg%3E">
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <noscript>
+    <p class="noscript-warning">Esta actividad necesita JavaScript. Actívalo en tu navegador para continuar.</p>
+  </noscript>
+  <div id="app" data-app-name="{{ app_name }}" data-logo="{{ logo_text }}">
+    <div class="boot" role="status" aria-live="polite">
+      <p>Cargando actividad…</p>
+    </div>
+  </div>
+  <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
+  <script src="assets/vendor/jszip.min.js"></script>
+  <script src="assets/vendor/purify.min.js"></script>
+  <script type="module" src="assets/app.js"></script>
+</body>
+</html>

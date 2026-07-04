@@ -1,0 +1,91 @@
+name: CI y publicación en GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias Python (bloqueadas)
+        run: uv sync --locked
+
+      - name: Node para las pruebas del reproductor
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Instalar dependencias frontend (bloqueadas)
+        run: npm ci
+
+      - name: Lint (ruff check)
+        run: uv run ruff check .
+
+      - name: Formato (ruff format --check)
+        run: uv run ruff format --check .
+
+      - name: Tipos (mypy)
+        run: uv run mypy src/aulastep
+
+      - name: Pruebas Python (pytest)
+        run: uv run pytest
+
+      - name: Pruebas frontend (Vitest)
+        run: npm run test
+
+      - name: Navegadores de Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Pruebas E2E (Playwright + axe)
+        run: npm run test:e2e
+
+      - name: Publicar las actividades (una subcarpeta por actividad)
+        run: uv run aulastep publish examples --output _site --clean --title "Actividades de ejemplo"
+
+      - name: Generar la skill aulastep-authoring
+        run: ./scripts/build_skill.sh dist/aulastep-authoring.skill
+
+      - name: Subir la skill como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: aulastep-authoring-skill
+          path: dist/aulastep-authoring.skill
+          if-no-files-found: error
+
+      - name: Subir artefacto para Pages
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  publicar:
+    if: github.ref == 'refs/heads/main'
+    needs: pruebas
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Desplegar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

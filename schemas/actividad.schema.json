@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aulastep.dev/schemas/actividad.schema.json",
+  "title": "AulaStep · actividad.yml",
+  "description": "Configuración de una actividad AulaStep. Los pasos NO se declaran aquí: se descubren y ordenan por el nombre de archivo en pasos/.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["actividad"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+$", "default": "1.0" },
+    "actividad": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "titulo"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "titulo": { "type": "string", "minLength": 1 },
+        "subtitulo": { "type": "string" },
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$", "default": "1.0.0" },
+        "descripcion": { "type": "string" },
+        "autor": { "type": "string" },
+        "modulo": { "type": "string" },
+        "curso": { "type": "string" },
+        "duracion_minutos": { "type": "integer", "minimum": 0 },
+        "tema": { "enum": ["oceano", "bosque", "indigo", "ambar", "grafito", "coral"], "default": "oceano" },
+        "licencia": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Referencia de licencia mostrada siempre en la portada y el pie. Por defecto, CC BY-NC-SA 4.0.",
+          "properties": {
+            "nombre": { "type": "string", "default": "CC BY-NC-SA 4.0" },
+            "nombre_completo": { "type": "string", "default": "Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional" },
+            "url": { "type": "string", "format": "uri", "default": "https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" },
+            "condiciones": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "navegacion": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "modo": { "enum": ["asistente", "libre", "secuencial"], "default": "asistente" },
+        "permitir_anterior": { "type": "boolean", "default": true },
+        "permitir_saltar": { "type": "boolean", "default": true },
+        "mostrar_indice": { "type": "boolean", "default": true },
+        "mostrar_progreso": { "type": "boolean", "default": true },
+        "exigir_obligatorios_para_avanzar": { "type": "boolean", "default": false }
+      }
+    },
+    "alumno": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "campos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "etiqueta"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+              "etiqueta": { "type": "string" },
+              "tipo": { "enum": ["texto"], "default": "texto" },
+              "obligatorio": { "type": "boolean", "default": false }
+            }
+          }
+        }
+      }
+    },
+    "trabajo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "autoguardado": { "type": "boolean", "default": true },
+        "intervalo_autoguardado_segundos": { "type": "integer", "minimum": 1, "default": 5 },
+        "permitir_exportar": { "type": "boolean", "default": true },
+        "permitir_importar": { "type": "boolean", "default": true },
+        "extension": { "type": "string", "default": "aulawork" },
+        "patron_nombre": { "type": "string", "default": "{actividad}_{alumno}_{fecha}.aulawork" }
+      }
+    },
+    "limites": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tamano_maximo_captura_mb": { "type": "integer", "minimum": 1, "default": 8 },
+        "tamano_maximo_adjunto_mb": { "type": "integer", "minimum": 1, "default": 20 },
+        "tamano_maximo_paquete_mb": { "type": "integer", "minimum": 1, "default": 100 }
+      }
+    }
+  }
+}
