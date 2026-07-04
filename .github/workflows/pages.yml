@@ -23,8 +23,6 @@ jobs:
 
       - name: Instalar uv
         uses: astral-sh/setup-uv@v3
-        with:
-          python-version: "3.12"
 
       - name: Instalar dependencias Python (bloqueadas)
         run: uv sync --locked
@@ -32,7 +30,7 @@ jobs:
       - name: Node para las pruebas del reproductor
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
 
       - name: Instalar dependencias frontend (bloqueadas)
@@ -63,7 +61,7 @@ jobs:
         run: uv run aulastep publish examples --output _site --clean --title "Actividades de ejemplo"
 
       - name: Generar la skill aulastep-authoring
-        run: ./scripts/build_skill.sh dist/aulastep-authoring.skill
+        run: bash ./scripts/build_skill.sh dist/aulastep-authoring.skill
 
       - name: Subir la skill como artefacto
         uses: actions/upload-artifact@v4
