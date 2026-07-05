@@ -69,5 +69,11 @@ def parse_step_front_matter(path: Path, report: Report) -> tuple[StepFrontMatter
     try:
         return StepFrontMatter.model_validate(data), body
     except ValidationError as exc:
-        report.error("PASO_FRONT_MATTER", _format_pydantic_errors(exc), str(path))
+        message = _format_pydantic_errors(exc)
+        if "Extra inputs" in message:
+            message += (
+                " Pista: los campos personalizados (de wikis u otros sistemas) "
+                "deben anidarse bajo 'meta:'."
+            )
+        report.error("PASO_FRONT_MATTER", message, str(path))
         return None, body

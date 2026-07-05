@@ -13,6 +13,9 @@ Compila todas las actividades encontradas en una carpeta (subcarpetas con
 from __future__ import annotations
 
 import shutil
+import subprocess
+import unicodedata
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -27,6 +30,49 @@ _env = Environment(
     loader=PackageLoader("aulastep", "templates"),
     autoescape=select_autoescape(["html", "j2"]),
 )
+
+
+def _normalize(text: str) -> str:
+    """minúsculas y sin tildes: criterio único de búsqueda (Python y JS)."""
+    text = unicodedata.normalize("NFD", text)
+    text = "".join(c for c in text if unicodedata.category(c) != "Mn")
+    return text.lower()
+
+
+BADGE_DIAS = 30  # una actividad es «nueva»/«actualizada» durante este plazo
+
+
+def _git_dates(activity_dir: Path) -> tuple[datetime | None, datetime | None]:
+    """(creación, última actualización) según los commits que tocaron la carpeta.
+
+    Sin historial disponible → (None, None): antes que una fecha falsa
+    (mtime reescrito por el CI), ninguna fecha. En GitHub Actions requiere
+    checkout con fetch-depth: 0.
+    """
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(activity_dir), "log", "--format=%cI", "--", "."],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        ).stdout.strip()
+        if not out:
+            return None, None
+        lines = out.splitlines()
+        return datetime.fromisoformat(lines[-1]), datetime.fromisoformat(lines[0])
+    except (OSError, ValueError, subprocess.TimeoutExpired):
+        return None, None
+
+
+def _badge(created: datetime | None, updated: datetime | None) -> str | None:
+    now = datetime.now(UTC)
+    limit = timedelta(days=BADGE_DIAS)
+    if created and now - created <= limit:
+        return "nueva"
+    if updated and now - updated <= limit:
+        return "actualizada"
+    return None
 
 
 def discover_activities(source_dir: Path) -> list[Path]:
@@ -76,6 +122,13 @@ def publish(
             continue
         meta = loader.compiled.activity
         aid = str(meta["id"])
+        if loader.config is not None and not loader.config.actividad.publicada:
+            report.warning(
+                "BORRADOR_OMITIDO",
+                f"'{activity_dir.name}' es un borrador (publicada: false): "
+                "validada pero fuera del catálogo.",
+            )
+            continue
         if aid in seen_ids:
             report.error(
                 "PUBLICACION_ID_DUPLICADO",
@@ -85,6 +138,7 @@ def publish(
             continue
         seen_ids[aid] = activity_dir
 
+        created, updated = _git_dates(activity_dir)
         sub_report, dist = build(activity_dir, output=output / aid, clean=True)
         for issue in sub_report.issues:
             report.issues.append(issue)
@@ -103,16 +157,26 @@ def publish(
                 "autor": meta.get("autor", ""),
                 "licencia": meta.get("licencia", {}),
                 "pasos": len(loader.compiled.steps),
+                "actualizada": updated,
+                "badge": _badge(created, updated),
+                "buscar": _normalize(
+                    " ".join(
+                        str(meta.get(k, "") or "")
+                        for k in ("titulo", "subtitulo", "descripcion", "modulo", "curso", "autor")
+                    )
+                ),
             }
         )
 
     if not report.ok:
         return report, None
 
+    modulos = sorted({e["modulo"] for e in entries if e["modulo"]})
     template = _env.get_template("publish-index.html.j2")
     html = template.render(
         title=title,
         entries=entries,
+        modulos=modulos,
         app_name=branding.APP_NAME,
         app_version=branding.APP_VERSION,
     )

@@ -30,7 +30,8 @@ actividad:
   modulo: Servicios en Red
   curso: 2º SMR
   duracion_minutos: 110
-  tema: oceano               # oceano | bosque | indigo | ambar | grafito | coral
+  tema: oceano               # oceano | bosque | indigo | ambar | grafito | coral | halloween
+  publicada: true            # con false: borrador (se valida, no entra al catálogo)
   licencia:                  # opcional: si se omite, CC BY-NC-SA 4.0
     nombre: CC BY-NC-SA 4.0
     nombre_completo: Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional
@@ -99,6 +100,27 @@ Reglas del nombre (patrón `^\d{2,3}-[a-z0-9][a-z0-9-]*\.md$`):
 
 - prefijo de 2 o 3 dígitos + guion + nombre en minúsculas/dígitos/guiones;
 - prefijos duplicados → **error**; saltos de numeración → aviso.
+
+### Metadatos de otros sistemas: el cajón `meta:`
+
+Si tu flujo (una wiki, un LMS, un pipeline de IA) necesita metadatos propios
+en `actividad.yml` o en el front matter de un paso, anídalos bajo `meta:`:
+
+```yaml
+---
+id: instalacion-kea
+titulo: Instalación de Kea
+meta:
+  tipo: practica
+  dominio: Servicios en Red
+  estado: publicado
+  tags: [dhcp, kea]
+---
+```
+
+`meta:` admite cualquier contenido, no afecta a la validación del resto y
+**jamás se publica** en la web compilada. Cualquier campo desconocido *fuera*
+de `meta:` sigue siendo un error (protección frente a erratas).
 
 Cada paso comienza con front matter YAML:
 

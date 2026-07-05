@@ -73,7 +73,20 @@ export function confirmModal(title, message, confirmLabel = "Confirmar") {
 export function openLightbox(url, alt) {
   const dialog = el("dialog", { class: "lightbox" });
   dialog.append(
-    el("img", { src: url, alt: alt || "Vista ampliada" }),
+    // Enlace real (no onclick): teclado, clic con rueda y pulsación larga
+    // nativos. El blob URL de la miniatura vive toda la sesión, así que la
+    // pestaña nueva siempre encuentra la imagen.
+    el(
+      "a",
+      {
+        href: url,
+        target: "_blank",
+        rel: "noopener",
+        title: "Abrir a tamaño completo en una pestaña nueva",
+        "aria-label": "Abrir la captura a tamaño completo en una pestaña nueva",
+      },
+      el("img", { src: url, alt: alt || "Vista ampliada" })
+    ),
     el("button", { class: "btn btn-secondary", type: "button", text: "Cerrar", onclick: () => dialog.close() })
   );
   dialog.addEventListener("close", () => dialog.remove());

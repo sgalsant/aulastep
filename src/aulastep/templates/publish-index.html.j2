@@ -40,6 +40,29 @@
     font-family: var(--font-mono); font-size: .74rem; letter-spacing: .04em; color: var(--muted);
   }
   .meta span::before { content: "· "; color: var(--accent); }
+  .filtros { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin: 0 0 1.1rem; }
+  .filtros input[type="search"], .filtros select {
+    font: inherit; font-size: .92rem; color: var(--text);
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 8px; padding: .5rem .8rem;
+  }
+  .filtros input[type="search"] { flex: 1; min-width: 14rem; }
+  .filtros input[type="search"]:focus-visible, .filtros select:focus-visible {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(14, 124, 134, .18);
+  }
+  .contador { font-family: var(--font-mono); font-size: .76rem; color: var(--muted); white-space: nowrap; }
+  .sin-resultados {
+    background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius);
+    padding: 1.6rem 1.2rem; text-align: center; color: var(--muted);
+  }
+  .card[data-oculta] { display: none; }
+  .badge { display: inline-block; vertical-align: middle; margin-left: .5rem;
+           font-family: var(--font-mono); font-size: .62rem; font-weight: 700;
+           letter-spacing: .09em; text-transform: uppercase;
+           border-radius: 99px; padding: .12rem .55rem; }
+  .badge-nueva { background: var(--accent); color: #fff; }
+  .badge-actualizada { color: var(--accent); border: 1.5px solid var(--accent); }
   footer {
     margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border);
     font-family: var(--font-mono); font-size: .72rem; color: var(--muted); text-align: center;
@@ -54,9 +77,19 @@
   <h1>{{ title }}</h1>
   <p class="lead">Elige una actividad para empezar o continuar tu trabajo.</p>
 
+  <div class="filtros" id="filtros" hidden>
+    <input type="search" id="buscador" placeholder="Buscar por título, módulo, autor…"
+           aria-label="Buscar actividades">
+    <select id="filtro-modulo" aria-label="Filtrar por módulo">
+      <option value="">Todos los módulos</option>
+      {% for m in modulos %}<option value="{{ m }}">{{ m }}</option>{% endfor %}
+    </select>
+    <span class="contador" id="contador" role="status" aria-live="polite"></span>
+  </div>
+
   {% for e in entries %}
-  <a class="card" href="{{ e.id }}/">
-    <h2>{{ e.titulo }}</h2>
+  <a class="card" href="{{ e.id }}/" data-buscar="{{ e.buscar }}" data-modulo="{{ e.modulo }}">
+    <h2>{{ e.titulo }}{% if e.badge == "nueva" %}<span class="badge badge-nueva">Nueva</span>{% elif e.badge == "actualizada" %}<span class="badge badge-actualizada">Actualizada</span>{% endif %}</h2>
     {% if e.subtitulo %}<p class="sub">{{ e.subtitulo }}</p>{% endif %}
     <div class="meta">
       {% if e.modulo %}<span>{{ e.modulo }}</span>{% endif %}
@@ -64,10 +97,16 @@
       <span>{{ e.pasos }} pasos</span>
       {% if e.duracion %}<span>{{ e.duracion }} min</span>{% endif %}
       <span>v{{ e.version }}</span>
+      {% if e.actualizada %}<span>actualizada {{ e.actualizada.strftime("%d/%m/%Y") }}</span>{% endif %}
       {% if e.licencia and e.licencia.nombre %}<span>{{ e.licencia.nombre }}</span>{% endif %}
     </div>
   </a>
   {% endfor %}
+
+  <p class="sin-resultados" id="sin-resultados" hidden>
+    Ninguna actividad coincide con la búsqueda. Prueba con otras palabras o
+    quita el filtro de módulo.
+  </p>
 
   <footer>
     Generado con {{ app_name }} v{{ app_version }}
@@ -76,5 +115,53 @@
     {% endif %}
   </footer>
 </main>
+<script>
+(function () {
+  "use strict";
+  var cards = Array.prototype.slice.call(document.querySelectorAll(".card"));
+  var filtros = document.getElementById("filtros");
+  var buscador = document.getElementById("buscador");
+  var selectModulo = document.getElementById("filtro-modulo");
+  var contador = document.getElementById("contador");
+  var vacio = document.getElementById("sin-resultados");
+  if (!cards.length || !filtros) return;
+  filtros.hidden = false; // sin JS estos controles nunca aparecen
+
+  // Estado en la URL (?q=…&modulo=…): enlaces profundos a vistas filtradas.
+  var params = new URLSearchParams(location.search);
+  if (params.get("q")) buscador.value = params.get("q");
+  if (params.get("modulo")) selectModulo.value = params.get("modulo");
+
+  function reflejarURL() {
+    var p = new URLSearchParams();
+    if (buscador.value.trim()) p.set("q", buscador.value.trim());
+    if (selectModulo.value) p.set("modulo", selectModulo.value);
+    var qs = p.toString();
+    history.replaceState(null, "", qs ? "?" + qs : location.pathname);
+  }
+
+  function normalizar(texto) {
+    return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  }
+  function aplicar() {
+    var consulta = normalizar(buscador.value.trim());
+    var modulo = selectModulo.value;
+    var visibles = 0;
+    cards.forEach(function (card) {
+      var coincide =
+        (!consulta || card.dataset.buscar.indexOf(consulta) !== -1) &&
+        (!modulo || card.dataset.modulo === modulo);
+      if (coincide) { card.removeAttribute("data-oculta"); visibles += 1; }
+      else { card.setAttribute("data-oculta", ""); }
+    });
+    contador.textContent = visibles + " de " + cards.length + " actividades";
+    vacio.hidden = visibles !== 0;
+    reflejarURL();
+  }
+  buscador.addEventListener("input", aplicar);
+  selectModulo.addEventListener("change", aplicar);
+  aplicar();
+})();
+</script>
 </body>
 </html>

@@ -30,6 +30,7 @@ const THEMES = [
   ["ambar", "Ámbar"],
   ["grafito", "Grafito"],
   ["coral", "Coral"],
+  ["halloween", "Halloween"],
 ];
 
 const appRoot = document.getElementById("app");
@@ -397,16 +398,6 @@ async function enterShell(startStepId) {
     await state.store.setMeta({ theme: themeSelect.value });
   });
 
-  const railToggle = el("button", {
-    class: "btn btn-ghost btn-sm rail-toggle", type: "button", text: "Pasos",
-    "aria-expanded": "true",
-    onclick: () => {
-      const hidden = shellRefs.railHost.hidden;
-      shellRefs.railHost.hidden = !hidden;
-      railToggle.setAttribute("aria-expanded", String(hidden));
-    },
-  });
-
   const topbarButtons = [];
   if (state.activity.trabajo.permitir_exportar) {
     topbarButtons.push(el("button", { class: "btn btn-secondary btn-sm", type: "button", text: "Guardar copia", onclick: exportWork }));
@@ -429,7 +420,6 @@ async function enterShell(startStepId) {
       el(
         "header",
         { class: "topbar" },
-        railToggle,
         el("span", { class: "logo", text: LOGO }),
         el("span", { class: "activity-title", text: activity.titulo }),
         el("span", { class: "spacer" }),
@@ -484,10 +474,7 @@ function renderRailNow() {
   const rail = renderRail(state.activity, currentId, state.progress, state.policy, (stepId) => {
     state.router.go(stepId);
   });
-  const wasHidden = shellRefs.railHost.firstChild ? shellRefs.railHost.hidden : window.matchMedia("(max-width: 900px)").matches;
   shellRefs.railHost.replaceChildren(rail);
-  shellRefs.railHost.hidden = wasHidden;
-  document.querySelector(".rail-toggle")?.setAttribute("aria-expanded", String(!wasHidden));
 }
 
 /* ------------------------------------------------------------- paso actual */

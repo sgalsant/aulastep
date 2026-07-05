@@ -50,6 +50,29 @@ def _build_renderer() -> MarkdownIt:
         return self.renderToken(tokens, idx, options, env)
 
     md.add_render_rule("link_open", link_open)
+
+    # Las tablas se envuelven para poder desplazarse en horizontal en móvil
+    # sin desbordar la página (los datos de red suelen ser anchos).
+    def table_open(
+        self: RendererHTML,
+        tokens: Sequence[Token],
+        idx: int,
+        options: OptionsDict,
+        env: EnvType,
+    ) -> str:
+        return '<div class="table-scroll">' + self.renderToken(tokens, idx, options, env)
+
+    def table_close(
+        self: RendererHTML,
+        tokens: Sequence[Token],
+        idx: int,
+        options: OptionsDict,
+        env: EnvType,
+    ) -> str:
+        return self.renderToken(tokens, idx, options, env) + "</div>"
+
+    md.add_render_rule("table_open", table_open)
+    md.add_render_rule("table_close", table_close)
     return md
 
 

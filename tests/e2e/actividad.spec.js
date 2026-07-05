@@ -83,6 +83,19 @@ test.describe("Recorrido del alumno", () => {
     await chooser.setFiles({ name: "captura.png", mimeType: "image/png", buffer: png });
 
     await expect(page.locator("#item-captura-ip-servidor img")).toBeVisible();
+
+    // Lightbox: clic en la miniatura amplía; la imagen ampliada es un enlace
+    // real a tamaño completo (pestaña nueva) y el diálogo se cierra con Esc.
+    await page.locator("#item-captura-ip-servidor .evidence-thumb").click();
+    const lightbox = page.locator("dialog.lightbox");
+    await expect(lightbox).toBeVisible();
+    const enlace = lightbox.locator("a");
+    await expect(enlace).toHaveAttribute("target", "_blank");
+    await expect(enlace).toHaveAttribute("href", /^blob:/);
+    await expect(enlace.locator("img")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(lightbox).toHaveCount(0);
+
     await page.locator("#item-captura-ip-servidor textarea").fill("IP estática aplicada");
 
     await page.locator("#item-captura-ip-servidor").getByRole("button", { name: "Eliminar" }).click();

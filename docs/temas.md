@@ -12,6 +12,7 @@ preferencia se guarda en su navegador y no afecta a nadie más.
 | `ambar` | tierras cálidas | claro |
 | `grafito` | alto contraste técnico | **oscuro** |
 | `coral` | rojizos enérgicos | claro |
+| `halloween` | calabaza sobre púrpura nocturno (estacional) | **oscuro** |
 
 ## Cómo funcionan
 
@@ -20,7 +21,7 @@ Todo el estilo vive en `styles.css`, que consume exclusivamente *tokens* CSS
 `--c-border`, estados `--c-success/warning/danger/info`, código
 `--c-code-bg/--c-code-text`, y progreso `--c-progress/--c-active/--c-done`).
 Cada tema de `themes.css` es solo un bloque `[data-theme="nombre"]` que asigna
-esos tokens. Los pares texto/fondo de los seis temas cumplen contraste WCAG AA.
+esos tokens. Los pares texto/fondo de todos los temas cumplen contraste WCAG AA.
 
 ## Crear un tema propio
 

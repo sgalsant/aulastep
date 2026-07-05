@@ -146,3 +146,28 @@
   --focus-ring: #a8402f;
   --shadow: 0 1px 2px rgba(67, 32, 26, .08), 0 4px 14px rgba(67, 32, 26, .07);
 }
+
+/* Halloween: calabaza sobre púrpura nocturno (oscuro). Pares texto/fondo AA. */
+[data-theme="halloween"] {
+  --c-bg: #161020;
+  --c-surface: #1f1729;
+  --c-surface-2: #2a2038;
+  --c-text: #f3ead9;
+  --c-text-muted: #c0b1a0;
+  --c-primary: #e9701e;
+  --c-primary-strong: #f5852f;
+  --c-primary-contrast: #1d0e02;
+  --c-accent: #f0913c;
+  --c-border: #463a58;
+  --c-success: #7fd58a;
+  --c-warning: #f2c14e;
+  --c-danger: #ff8177;
+  --c-info: #9fb9ff;
+  --c-code-bg: #120b1b;
+  --c-code-text: #ead9c0;
+  --c-progress: #e9701e;
+  --c-active: #f0913c;
+  --c-done: #7fd58a;
+  --focus-ring: #f0913c;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 4px 16px rgba(10, 0, 20, .35);
+}

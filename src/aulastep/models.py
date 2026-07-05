@@ -86,6 +86,10 @@ class ActivityMeta(BaseModel):
     duracion_minutos: int | None = Field(default=None, ge=0)
     tema: str = branding.DEFAULT_THEME
     licencia: LicenseConfig = Field(default_factory=LicenseConfig)
+    meta: dict[str, Any] = Field(default_factory=dict)  # libre; no se publica
+    # Borradores: con false, `publish` valida la actividad pero no la incluye
+    # en el catálogo. validate/build/preview no se ven afectados.
+    publicada: bool = True
 
     _vid = field_validator("id")(_check_id)
 
@@ -148,6 +152,9 @@ class StepFrontMatter(BaseModel):
     descripcion: str = ""
     duracion_minutos: int | None = Field(default=None, ge=0)
     obligatorio: bool = True
+    # Cajón libre para metadatos de otros sistemas (wikis, LMS, pipelines).
+    # Se valida como dict y NUNCA se publica en activity.json.
+    meta: dict[str, Any] = Field(default_factory=dict)
 
     _vid = field_validator("id")(_check_id)
 

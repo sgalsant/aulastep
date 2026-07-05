@@ -22,7 +22,8 @@
         "modulo": { "type": "string" },
         "curso": { "type": "string" },
         "duracion_minutos": { "type": "integer", "minimum": 0 },
-        "tema": { "enum": ["oceano", "bosque", "indigo", "ambar", "grafito", "coral"], "default": "oceano" },
+        "publicada": { "type": "boolean", "default": true, "description": "Con false, publish valida la actividad pero la deja fuera del catálogo (borrador)." },
+        "tema": { "enum": ["oceano", "bosque", "indigo", "ambar", "grafito", "coral", "halloween"], "default": "oceano" },
         "licencia": {
           "type": "object",
           "additionalProperties": false,

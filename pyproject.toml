@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "aulastep"
-version = "0.1.0"
+version = "0.8.1"
 description = "Generador de actividades educativas guiadas: Markdown a aplicación web estática (HTML5/CSS/JS)."
 readme = "README.md"
 license = { file = "LICENSE" }

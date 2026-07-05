@@ -173,3 +173,54 @@ actividad:
     assert lic["nombre"] == "CC BY 4.0"
     assert loader.compiled.activity["autor"] == "Santiago Galván Sánchez"
     assert lic["condiciones"] == ["se reconozca adecuadamente la autoría."]
+
+
+def test_meta_libre_se_acepta_y_no_se_publica(make_activity):
+    yml = """schema_version: "1.0"
+actividad:
+  id: demo
+  titulo: Demo
+  version: 1.0.0
+  meta:
+    dominio: Servicios en Red
+    tags: [dhcp, kea]
+"""
+    step = """---
+id: a
+titulo: Paso
+meta:
+  tipo: practica
+  estado: publicado
+  prioridad_consulta: alta
+---
+Contenido.
+"""
+    loader = load_project(make_activity({"01-a.md": step}, yml=yml))
+    assert loader.report.ok, [str(i) for i in loader.report.issues]
+    payload = loader.compiled.to_json()
+    assert '"meta"' not in payload  # el cajón libre jamás viaja a la web
+    assert "prioridad_consulta" not in payload
+
+
+def test_campos_extra_fuera_de_meta_dan_pista(make_activity):
+    step = """---
+id: a
+titulo: Paso
+dominio: Servicios en Red
+tags: [dhcp]
+---
+Contenido.
+"""
+    loader = load_project(make_activity({"01-a.md": step}))
+    errores = [str(i) for i in loader.report.errors]
+    assert any("Extra inputs" in e for e in errores)
+    assert any("anidarse bajo 'meta:'" in e for e in errores)
+
+
+def test_tablas_envueltas_para_scroll_movil(make_activity):
+    body = "| A | B |\n|---|---|\n| 1 | 2 |"
+    loader = load_project(make_activity({"01-a.md": STEP.format(sid="a", body=body)}))
+    assert loader.report.ok
+    html = loader.compiled.steps[0].segments[0].html
+    assert '<div class="table-scroll"><table>' in html
+    assert html.rstrip().endswith("</table>\n</div>")
