@@ -5,6 +5,7 @@ Es el corazón compartido por `validate`, `build`, `preview` e `inspect`.
 
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 from typing import Any, cast
@@ -75,7 +76,6 @@ class ProjectLoader:
         self.answer_key: dict[str, dict[str, Any]] = {}
         self._interactive_ids: dict[str, str] = {}  # id -> ubicación
         self._step_ids: dict[str, str] = {}
-        self._resource_refs: list[tuple[str, str]] = []  # (ref, ubicación)
         self._step_links: list[tuple[str, str]] = []
 
     # ------------------------------------------------------------------ carga
@@ -129,8 +129,7 @@ class ProjectLoader:
                     rel,
                 )
             self._step_ids[fm.id] = rel
-            for ref in extract_local_refs(body):
-                self._resource_refs.append((ref, rel))
+            body = self._process_resource_refs(body, rel)
             for target in extract_step_links(body):
                 self._step_links.append((target, rel))
             segments = self._compile_chunks(split_chunks(body, self.report, rel), rel)
@@ -146,7 +145,6 @@ class ProjectLoader:
                     segments=segments,
                 )
             )
-        self._validate_resources()
         return compiled_steps
 
     # ------------------------------------------------------------- directivas
@@ -290,25 +288,89 @@ class ProjectLoader:
         # task y checkpoint
         return Segment(type=kind, id=did, required=required, html=render_markdown(directive.body))
 
-    # ------------------------------------------------------------ validaciones
-    def _validate_resources(self) -> None:
-        for ref, where in self._resource_refs:
-            if ref.startswith("/") or ".." in ref.split("/"):
+    # ------------------------------------------------- recursos de los pasos
+    _REF_IN_LINK_RE = re.compile(r"(\]\()([^)\s]+)")
+
+    def _resolve_ref(self, ref: str, md_rel: str) -> tuple[Path | None, bool, str | None]:
+        """Resuelve una referencia local de un paso.
+
+        Devuelve (ruta_resuelta, convención_antigua, código_de_error).
+        Semántica Markdown estándar: relativa al archivo .md que la contiene.
+        Retrocompatibilidad: si así no existe, se intenta relativa a la raíz
+        de la actividad (convención antigua) con aviso de obsolescencia.
+        Seguridad por contención: la ruta resuelta debe quedar dentro de la
+        actividad; y por arquitectura, dentro de recursos/ (es lo único que
+        se copia a la publicación).
+        """
+        if ref.startswith("/") or "\\" in ref or re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", ref):
+            return None, False, "RECURSO_RUTA_INSEGURA"
+        root = self.dir.resolve()
+        candidate = ((self.dir / md_rel).parent / ref).resolve()
+        if not candidate.is_relative_to(root):
+            return None, False, "RECURSO_RUTA_INSEGURA"
+        legacy = False
+        if not candidate.is_file():
+            alt = (self.dir / ref).resolve()
+            if alt.is_relative_to(root) and alt.is_file():
+                candidate, legacy = alt, True
+        if not candidate.is_file():
+            return None, False, "RECURSO_AUSENTE"
+        if not candidate.is_relative_to(root / RESOURCES_DIR):
+            return None, False, "RECURSO_FUERA_DE_RECURSOS"
+        return candidate, legacy, None
+
+    def _process_resource_refs(self, body: str, md_rel: str) -> str:
+        """Valida las referencias del paso y reescribe el cuerpo con rutas
+        normalizadas relativas a la raíz (lo que espera el HTML publicado,
+        que vive en la raíz de dist/), escriba el autor como escriba."""
+        rewrites: dict[str, str] = {}
+        for ref in extract_local_refs(body):
+            if ref in rewrites:
+                continue
+            resolved, legacy, error = self._resolve_ref(ref, md_rel)
+            if error == "RECURSO_RUTA_INSEGURA":
                 self.report.error(
                     "RECURSO_RUTA_INSEGURA",
-                    f"Referencia '{ref}' fuera del proyecto: usa rutas relativas dentro de la actividad.",
-                    where,
+                    f"Referencia '{ref}' apunta fuera de la actividad.",
+                    md_rel,
                 )
                 continue
-            target = self.dir / ref
-            if not target.is_file():
-                self.report.error("RECURSO_AUSENTE", f"El recurso '{ref}' no existe.", where)
-            elif target.stat().st_size > MAX_RESOURCE_MB * 1024 * 1024:
+            if error == "RECURSO_AUSENTE":
+                self.report.error("RECURSO_AUSENTE", f"El recurso '{ref}' no existe.", md_rel)
+                continue
+            if error == "RECURSO_FUERA_DE_RECURSOS":
+                self.report.error(
+                    "RECURSO_FUERA_DE_RECURSOS",
+                    f"'{ref}' existe pero no está en {RESOURCES_DIR}/: solo esa carpeta "
+                    "se copia a la publicación. Mueve allí el archivo.",
+                    md_rel,
+                )
+                continue
+            assert resolved is not None
+            if legacy:
+                self.report.warning(
+                    "RECURSO_CONVENCION_OBSOLETA",
+                    f"'{ref}' se resolvió desde la raíz de la actividad (convención "
+                    f"antigua). Escríbela relativa al paso: "
+                    f"'{os.path.relpath(resolved, (self.dir / md_rel).parent.resolve()).replace(os.sep, '/')}'.",
+                    md_rel,
+                )
+            if resolved.stat().st_size > MAX_RESOURCE_MB * 1024 * 1024:
                 self.report.warning(
                     "RECURSO_GRANDE",
                     f"'{ref}' supera {MAX_RESOURCE_MB} MB; encarecerá la publicación.",
-                    where,
+                    md_rel,
                 )
+            normalized = os.path.relpath(resolved, self.dir.resolve()).replace(os.sep, "/")
+            if normalized != ref:
+                rewrites[ref] = normalized
+        if not rewrites:
+            return body
+        return self._REF_IN_LINK_RE.sub(
+            lambda m: m.group(1) + rewrites.get(m.group(2), m.group(2)), body
+        )
+
+    # ------------------------------------------------------------ validaciones
 
     def _validate_step_links(self) -> None:
         for target, where in self._step_links:

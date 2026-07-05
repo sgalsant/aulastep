@@ -241,3 +241,24 @@ def test_borrador_roto_sigue_bloqueando_el_catalogo(tmp_path):
     report, site = publish(source, output=tmp_path / "_site", clean=True)
     assert site is None
     assert any(i.code == "PUBLICACION_ACTIVIDAD_INVALIDA" for i in report.errors)
+
+
+def test_html_publicado_enlaza_recursos_escritos_con_ruta_relativa_al_paso(tmp_path):
+    """(e) el autor escribe ../recursos/... y el sitio publicado enlaza bien."""
+    source = _make_source(tmp_path, ["con-recurso"])
+    root = source / "con-recurso"
+    (root / "recursos" / "diagrama.svg").write_text("<svg/>", encoding="utf-8")
+    (root / "pasos" / "01-presentacion.md").write_text(
+        "---\nid: presentacion\ntitulo: Presentación\n---\n\n"
+        "![diagrama](../recursos/diagrama.svg)\n\n"
+        "Descarga la [plantilla](../recursos/diagrama.svg).\n",
+        encoding="utf-8",
+    )
+    _, site = publish(source, output=tmp_path / "_site", clean=True)
+    assert site is not None
+    activity_json = (site / "con-recurso" / "activity.json").read_text(encoding="utf-8")
+    # Normalizadas a la raíz del dist, independientemente de cómo se escribieran
+    assert 'src=\\"recursos/diagrama.svg\\"' in activity_json
+    assert "../recursos" not in activity_json
+    # Y el archivo enlazado existe físicamente en la publicación
+    assert (site / "con-recurso" / "recursos" / "diagrama.svg").is_file()

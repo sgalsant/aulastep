@@ -41,7 +41,7 @@ def test_recurso_ausente(make_activity):
 
 
 def test_recurso_ruta_insegura(make_activity):
-    body = "[mal](../fuera.txt)"
+    body = "[mal](../../fuera.txt)"
     loader = load_project(make_activity({"01-a.md": STEP.format(sid="a", body=body)}))
     assert "RECURSO_RUTA_INSEGURA" in _codes(loader)
 
@@ -224,3 +224,56 @@ def test_tablas_envueltas_para_scroll_movil(make_activity):
     html = loader.compiled.steps[0].segments[0].html
     assert '<div class="table-scroll"><table>' in html
     assert html.rstrip().endswith("</table>\n</div>")
+
+
+# ---- Resolución de recursos relativa al archivo .md (semántica Markdown) ----
+
+
+def test_ref_relativa_al_paso_es_valida(make_activity):
+    """(a) ../recursos/... desde pasos/ es la convención estándar."""
+    steps = {"01-a.md": STEP.format(sid="a", body="![topo](../recursos/img.svg)")}
+    root = make_activity(steps)
+    (root / "recursos" / "img.svg").write_text("<svg/>", encoding="utf-8")
+    loader = load_project(root)
+    assert loader.report.ok, [str(i) for i in loader.report.issues]
+    assert not loader.report.warnings
+    # Reescrita a ruta relativa a la raíz (donde vive el HTML publicado)
+    assert 'src="recursos/img.svg"' in loader.compiled.steps[0].segments[0].html
+
+
+def test_ref_que_escapa_de_la_actividad_es_insegura(make_activity):
+    """(b) ../../fuera/... escapa de la raíz → RECURSO_RUTA_INSEGURA."""
+    steps = {"01-a.md": STEP.format(sid="a", body="![mal](../../fuera/img.png)")}
+    loader = load_project(make_activity(steps))
+    assert any(i.code == "RECURSO_RUTA_INSEGURA" for i in loader.report.errors)
+
+
+def test_ref_relativa_inexistente_es_ausente(make_activity):
+    """(c) resuelve dentro pero no existe → RECURSO_AUSENTE."""
+    steps = {"01-a.md": STEP.format(sid="a", body="![no](../recursos/no-esta.png)")}
+    loader = load_project(make_activity(steps))
+    assert any(i.code == "RECURSO_AUSENTE" for i in loader.report.errors)
+
+
+def test_convencion_antigua_funciona_con_aviso(make_activity):
+    """(d) 'recursos/x' desde pasos/ (convención antigua) → válida + warning."""
+    steps = {"01-a.md": STEP.format(sid="a", body="![topo](recursos/img.svg)")}
+    root = make_activity(steps)
+    (root / "recursos" / "img.svg").write_text("<svg/>", encoding="utf-8")
+    loader = load_project(root)
+    assert loader.report.ok
+    avisos = [i for i in loader.report.warnings if i.code == "RECURSO_CONVENCION_OBSOLETA"]
+    assert len(avisos) == 1 and "../recursos/img.svg" in str(avisos[0])
+    # La salida queda normalizada igual que con la convención nueva
+    assert 'src="recursos/img.svg"' in loader.compiled.steps[0].segments[0].html
+
+
+def test_recurso_dentro_de_la_actividad_pero_fuera_de_recursos(make_activity):
+    """Existe y no escapa, pero no viajaría a la publicación → error claro."""
+    steps = {
+        "01-a.md": STEP.format(sid="a", body="![suelta](../pasos/suelta.png)"),
+    }
+    root = make_activity(steps)
+    (root / "pasos" / "suelta.png").write_bytes(b"png")
+    loader = load_project(root)
+    assert any(i.code == "RECURSO_FUERA_DE_RECURSOS" for i in loader.report.errors)

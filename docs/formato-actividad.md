@@ -140,8 +140,13 @@ Contenido en Markdown (CommonMark + tablas + tachado + notas al pie)…
 
 - CommonMark completo, tablas, `~~tachado~~` y notas al pie.
 - **El HTML embebido se escapa**: no se interpreta (seguridad).
-- Imágenes y enlaces a `recursos/…` se validan (deben existir) y los enlaces a
-  recursos se marcan como descargables.
+- Imágenes y enlaces a recursos usan **rutas relativas al propio archivo del
+  paso** (semántica Markdown estándar): desde `pasos/01-x.md`, escribe
+  `../recursos/imagen.png`. Se validan (deben existir, quedar dentro de la
+  actividad y vivir en `recursos/`, que es lo único que viaja a la
+  publicación) y los enlaces a archivos se marcan como descargables. La
+  convención antigua (`recursos/imagen.png` a secas) sigue funcionando con un
+  aviso de obsolescencia; en la web publicada ambas quedan normalizadas igual.
 - Enlaces entre pasos con el esquema `paso:`: `[ver el paso 5](paso:arranque-servicio)`.
   Se validan contra los IDs reales.
 - Los bloques de código vallados reciben barra de terminal y botón **Copiar**.

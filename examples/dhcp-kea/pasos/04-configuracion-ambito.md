@@ -15,7 +15,7 @@ sudo cp /etc/kea/kea-dhcp4.conf /etc/kea/kea-dhcp4.conf.original
 ```
 
 Tienes una configuración base en el recurso
-[kea-dhcp4-base.conf](recursos/kea-dhcp4-base.conf). Descárgala, revísala y
+[kea-dhcp4-base.conf](../recursos/kea-dhcp4-base.conf). Descárgala, revísala y
 adáptala. Lo esencial:
 
 ```json

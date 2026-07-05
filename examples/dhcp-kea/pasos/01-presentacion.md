@@ -13,7 +13,7 @@ para dar servicio a la red del aula. Kea es el servidor DHCP moderno de ISC,
 sucesor del clásico `isc-dhcp-server`, y es el que encontrarás cada vez más en
 entornos profesionales.
 
-![Topología de la práctica](recursos/topologia.svg)
+![Topología de la práctica](../recursos/topologia.svg)
 
 ## Datos de la red
 

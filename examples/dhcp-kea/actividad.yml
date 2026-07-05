@@ -4,7 +4,7 @@ actividad:
   id: dhcp-kea-ubuntu
   titulo: Servidor DHCP con Kea en Ubuntu Server 24.04
   subtitulo: Despliegue y verificación en red local
-  version: 1.2.0
+  version: 1.3.0
   descripcion: >
     Instalarás y configurarás un servidor DHCP con Kea sobre Ubuntu Server
     24.04, definirás un ámbito para la red del aula y comprobarás desde un

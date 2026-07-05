@@ -50,8 +50,10 @@ una edición descuidada destruye su progreso.
 - Todo el texto visible en **español**, tono directo dirigido al alumno («tú»).
 - Directivas: cuerpo en Markdown; atributos siempre entre comillas dobles
   (`id="…" required="true"`); cierre `:::` obligatorio; sin anidar.
-- Recursos en `recursos/` y referenciados con ruta relativa
-  (`recursos/imagen.png`); nada de rutas absolutas ni `..`.
+- Recursos en `recursos/` y referenciados con ruta relativa **al archivo del
+  paso**: `../recursos/imagen.png` desde `pasos/`. Nada de rutas absolutas ni
+  de escapar de la actividad; la forma antigua `recursos/imagen.png` funciona
+  pero emite aviso: no la uses en contenido nuevo.
 - Enlaces entre pasos con `paso:` (`[texto](paso:id-del-paso)`), nunca con
   rutas de archivo ni anclas manuales.
 - Preguntas de elección: mínimo 2 opciones; `single-choice` con exactamente

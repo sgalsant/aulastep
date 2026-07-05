@@ -8,7 +8,7 @@ from __future__ import annotations
 
 APP_NAME = "AulaStep"
 APP_SLUG = "aulastep"
-APP_VERSION = "0.8.1"
+APP_VERSION = "0.9.0"
 WORK_EXTENSION = "aulawork"
 WORK_MIME = "application/zip"
 LOGO_TEXT = "Aula⟶Step"

@@ -1,0 +1,353 @@
+diff --git a/AGENTS.md b/AGENTS.md
+index dece56d..c8d5308 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -50,8 +50,10 @@ una edición descuidada destruye su progreso.
+ - Todo el texto visible en **español**, tono directo dirigido al alumno («tú»).
+ - Directivas: cuerpo en Markdown; atributos siempre entre comillas dobles
+   (`id="…" required="true"`); cierre `:::` obligatorio; sin anidar.
+-- Recursos en `recursos/` y referenciados con ruta relativa
+-  (`recursos/imagen.png`); nada de rutas absolutas ni `..`.
++- Recursos en `recursos/` y referenciados con ruta relativa **al archivo del
++  paso**: `../recursos/imagen.png` desde `pasos/`. Nada de rutas absolutas ni
++  de escapar de la actividad; la forma antigua `recursos/imagen.png` funciona
++  pero emite aviso: no la uses en contenido nuevo.
+ - Enlaces entre pasos con `paso:` (`[texto](paso:id-del-paso)`), nunca con
+   rutas de archivo ni anclas manuales.
+ - Preguntas de elección: mínimo 2 opciones; `single-choice` con exactamente
+diff --git a/docs/formato-actividad.md b/docs/formato-actividad.md
+index f3731ca..8e3e9b8 100644
+--- a/docs/formato-actividad.md
++++ b/docs/formato-actividad.md
+@@ -140,8 +140,13 @@ Contenido en Markdown (CommonMark + tablas + tachado + notas al pie)…
+ 
+ - CommonMark completo, tablas, `~~tachado~~` y notas al pie.
+ - **El HTML embebido se escapa**: no se interpreta (seguridad).
+-- Imágenes y enlaces a `recursos/…` se validan (deben existir) y los enlaces a
+-  recursos se marcan como descargables.
++- Imágenes y enlaces a recursos usan **rutas relativas al propio archivo del
++  paso** (semántica Markdown estándar): desde `pasos/01-x.md`, escribe
++  `../recursos/imagen.png`. Se validan (deben existir, quedar dentro de la
++  actividad y vivir en `recursos/`, que es lo único que viaja a la
++  publicación) y los enlaces a archivos se marcan como descargables. La
++  convención antigua (`recursos/imagen.png` a secas) sigue funcionando con un
++  aviso de obsolescencia; en la web publicada ambas quedan normalizadas igual.
+ - Enlaces entre pasos con el esquema `paso:`: `[ver el paso 5](paso:arranque-servicio)`.
+   Se validan contra los IDs reales.
+ - Los bloques de código vallados reciben barra de terminal y botón **Copiar**.
+diff --git a/examples/dhcp-kea/actividad.yml b/examples/dhcp-kea/actividad.yml
+index 9ebb91f..599ccb3 100644
+--- a/examples/dhcp-kea/actividad.yml
++++ b/examples/dhcp-kea/actividad.yml
+@@ -4,7 +4,7 @@ actividad:
+   id: dhcp-kea-ubuntu
+   titulo: Servidor DHCP con Kea en Ubuntu Server 24.04
+   subtitulo: Despliegue y verificación en red local
+-  version: 1.2.0
++  version: 1.3.0
+   descripcion: >
+     Instalarás y configurarás un servidor DHCP con Kea sobre Ubuntu Server
+     24.04, definirás un ámbito para la red del aula y comprobarás desde un
+diff --git a/examples/dhcp-kea/pasos/01-presentacion.md b/examples/dhcp-kea/pasos/01-presentacion.md
+index 184fd13..05d1e66 100644
+--- a/examples/dhcp-kea/pasos/01-presentacion.md
++++ b/examples/dhcp-kea/pasos/01-presentacion.md
+@@ -13,7 +13,7 @@ para dar servicio a la red del aula. Kea es el servidor DHCP moderno de ISC,
+ sucesor del clásico `isc-dhcp-server`, y es el que encontrarás cada vez más en
+ entornos profesionales.
+ 
+-![Topología de la práctica](recursos/topologia.svg)
++![Topología de la práctica](../recursos/topologia.svg)
+ 
+ ## Datos de la red
+ 
+diff --git a/examples/dhcp-kea/pasos/04-configuracion-ambito.md b/examples/dhcp-kea/pasos/04-configuracion-ambito.md
+index 36b3936..0f03872 100644
+--- a/examples/dhcp-kea/pasos/04-configuracion-ambito.md
++++ b/examples/dhcp-kea/pasos/04-configuracion-ambito.md
+@@ -15,7 +15,7 @@ sudo cp /etc/kea/kea-dhcp4.conf /etc/kea/kea-dhcp4.conf.original
+ ```
+ 
+ Tienes una configuración base en el recurso
+-[kea-dhcp4-base.conf](recursos/kea-dhcp4-base.conf). Descárgala, revísala y
++[kea-dhcp4-base.conf](../recursos/kea-dhcp4-base.conf). Descárgala, revísala y
+ adáptala. Lo esencial:
+ 
+ ```json
+diff --git a/pyproject.toml b/pyproject.toml
+index 00f550e..9cedd98 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
+ 
+ [project]
+ name = "aulastep"
+-version = "0.8.1"
++version = "0.9.0"
+ description = "Generador de actividades educativas guiadas: Markdown a aplicación web estática (HTML5/CSS/JS)."
+ readme = "README.md"
+ license = { file = "LICENSE" }
+diff --git a/src/aulastep/branding.py b/src/aulastep/branding.py
+index 50f023f..17a2fe0 100644
+--- a/src/aulastep/branding.py
++++ b/src/aulastep/branding.py
+@@ -8,7 +8,7 @@ from __future__ import annotations
+ 
+ APP_NAME = "AulaStep"
+ APP_SLUG = "aulastep"
+-APP_VERSION = "0.8.1"
++APP_VERSION = "0.9.0"
+ WORK_EXTENSION = "aulawork"
+ WORK_MIME = "application/zip"
+ LOGO_TEXT = "Aula⟶Step"
+diff --git a/src/aulastep/project.py b/src/aulastep/project.py
+index 8e49190..38aa962 100644
+--- a/src/aulastep/project.py
++++ b/src/aulastep/project.py
+@@ -5,6 +5,7 @@ Es el corazón compartido por `validate`, `build`, `preview` e `inspect`.
+ 
+ from __future__ import annotations
+ 
++import os
+ import re
+ from pathlib import Path
+ from typing import Any, cast
+@@ -75,7 +76,6 @@ class ProjectLoader:
+         self.answer_key: dict[str, dict[str, Any]] = {}
+         self._interactive_ids: dict[str, str] = {}  # id -> ubicación
+         self._step_ids: dict[str, str] = {}
+-        self._resource_refs: list[tuple[str, str]] = []  # (ref, ubicación)
+         self._step_links: list[tuple[str, str]] = []
+ 
+     # ------------------------------------------------------------------ carga
+@@ -129,8 +129,7 @@ class ProjectLoader:
+                     rel,
+                 )
+             self._step_ids[fm.id] = rel
+-            for ref in extract_local_refs(body):
+-                self._resource_refs.append((ref, rel))
++            body = self._process_resource_refs(body, rel)
+             for target in extract_step_links(body):
+                 self._step_links.append((target, rel))
+             segments = self._compile_chunks(split_chunks(body, self.report, rel), rel)
+@@ -146,7 +145,6 @@ class ProjectLoader:
+                     segments=segments,
+                 )
+             )
+-        self._validate_resources()
+         return compiled_steps
+ 
+     # ------------------------------------------------------------- directivas
+@@ -290,25 +288,89 @@ class ProjectLoader:
+         # task y checkpoint
+         return Segment(type=kind, id=did, required=required, html=render_markdown(directive.body))
+ 
+-    # ------------------------------------------------------------ validaciones
+-    def _validate_resources(self) -> None:
+-        for ref, where in self._resource_refs:
+-            if ref.startswith("/") or ".." in ref.split("/"):
++    # ------------------------------------------------- recursos de los pasos
++    _REF_IN_LINK_RE = re.compile(r"(\]\()([^)\s]+)")
++
++    def _resolve_ref(self, ref: str, md_rel: str) -> tuple[Path | None, bool, str | None]:
++        """Resuelve una referencia local de un paso.
++
++        Devuelve (ruta_resuelta, convención_antigua, código_de_error).
++        Semántica Markdown estándar: relativa al archivo .md que la contiene.
++        Retrocompatibilidad: si así no existe, se intenta relativa a la raíz
++        de la actividad (convención antigua) con aviso de obsolescencia.
++        Seguridad por contención: la ruta resuelta debe quedar dentro de la
++        actividad; y por arquitectura, dentro de recursos/ (es lo único que
++        se copia a la publicación).
++        """
++        if ref.startswith("/") or "\\" in ref or re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", ref):
++            return None, False, "RECURSO_RUTA_INSEGURA"
++        root = self.dir.resolve()
++        candidate = ((self.dir / md_rel).parent / ref).resolve()
++        if not candidate.is_relative_to(root):
++            return None, False, "RECURSO_RUTA_INSEGURA"
++        legacy = False
++        if not candidate.is_file():
++            alt = (self.dir / ref).resolve()
++            if alt.is_relative_to(root) and alt.is_file():
++                candidate, legacy = alt, True
++        if not candidate.is_file():
++            return None, False, "RECURSO_AUSENTE"
++        if not candidate.is_relative_to(root / RESOURCES_DIR):
++            return None, False, "RECURSO_FUERA_DE_RECURSOS"
++        return candidate, legacy, None
++
++    def _process_resource_refs(self, body: str, md_rel: str) -> str:
++        """Valida las referencias del paso y reescribe el cuerpo con rutas
++        normalizadas relativas a la raíz (lo que espera el HTML publicado,
++        que vive en la raíz de dist/), escriba el autor como escriba."""
++        rewrites: dict[str, str] = {}
++        for ref in extract_local_refs(body):
++            if ref in rewrites:
++                continue
++            resolved, legacy, error = self._resolve_ref(ref, md_rel)
++            if error == "RECURSO_RUTA_INSEGURA":
+                 self.report.error(
+                     "RECURSO_RUTA_INSEGURA",
+-                    f"Referencia '{ref}' fuera del proyecto: usa rutas relativas dentro de la actividad.",
+-                    where,
++                    f"Referencia '{ref}' apunta fuera de la actividad.",
++                    md_rel,
++                )
++                continue
++            if error == "RECURSO_AUSENTE":
++                self.report.error("RECURSO_AUSENTE", f"El recurso '{ref}' no existe.", md_rel)
++                continue
++            if error == "RECURSO_FUERA_DE_RECURSOS":
++                self.report.error(
++                    "RECURSO_FUERA_DE_RECURSOS",
++                    f"'{ref}' existe pero no está en {RESOURCES_DIR}/: solo esa carpeta "
++                    "se copia a la publicación. Mueve allí el archivo.",
++                    md_rel,
+                 )
+                 continue
+-            target = self.dir / ref
+-            if not target.is_file():
+-                self.report.error("RECURSO_AUSENTE", f"El recurso '{ref}' no existe.", where)
+-            elif target.stat().st_size > MAX_RESOURCE_MB * 1024 * 1024:
++            assert resolved is not None
++            if legacy:
++                self.report.warning(
++                    "RECURSO_CONVENCION_OBSOLETA",
++                    f"'{ref}' se resolvió desde la raíz de la actividad (convención "
++                    f"antigua). Escríbela relativa al paso: "
++                    f"'{os.path.relpath(resolved, (self.dir / md_rel).parent.resolve()).replace(os.sep, '/')}'.",
++                    md_rel,
++                )
++            if resolved.stat().st_size > MAX_RESOURCE_MB * 1024 * 1024:
+                 self.report.warning(
+                     "RECURSO_GRANDE",
+                     f"'{ref}' supera {MAX_RESOURCE_MB} MB; encarecerá la publicación.",
+-                    where,
++                    md_rel,
+                 )
++            normalized = os.path.relpath(resolved, self.dir.resolve()).replace(os.sep, "/")
++            if normalized != ref:
++                rewrites[ref] = normalized
++        if not rewrites:
++            return body
++        return self._REF_IN_LINK_RE.sub(
++            lambda m: m.group(1) + rewrites.get(m.group(2), m.group(2)), body
++        )
++
++    # ------------------------------------------------------------ validaciones
+ 
+     def _validate_step_links(self) -> None:
+         for target, where in self._step_links:
+diff --git a/tests/python/test_project.py b/tests/python/test_project.py
+index 1881fa8..b557dd1 100644
+--- a/tests/python/test_project.py
++++ b/tests/python/test_project.py
+@@ -41,7 +41,7 @@ def test_recurso_ausente(make_activity):
+ 
+ 
+ def test_recurso_ruta_insegura(make_activity):
+-    body = "[mal](../fuera.txt)"
++    body = "[mal](../../fuera.txt)"
+     loader = load_project(make_activity({"01-a.md": STEP.format(sid="a", body=body)}))
+     assert "RECURSO_RUTA_INSEGURA" in _codes(loader)
+ 
+@@ -224,3 +224,56 @@ def test_tablas_envueltas_para_scroll_movil(make_activity):
+     html = loader.compiled.steps[0].segments[0].html
+     assert '<div class="table-scroll"><table>' in html
+     assert html.rstrip().endswith("</table>\n</div>")
++
++
++# ---- Resolución de recursos relativa al archivo .md (semántica Markdown) ----
++
++
++def test_ref_relativa_al_paso_es_valida(make_activity):
++    """(a) ../recursos/... desde pasos/ es la convención estándar."""
++    steps = {"01-a.md": STEP.format(sid="a", body="![topo](../recursos/img.svg)")}
++    root = make_activity(steps)
++    (root / "recursos" / "img.svg").write_text("<svg/>", encoding="utf-8")
++    loader = load_project(root)
++    assert loader.report.ok, [str(i) for i in loader.report.issues]
++    assert not loader.report.warnings
++    # Reescrita a ruta relativa a la raíz (donde vive el HTML publicado)
++    assert 'src="recursos/img.svg"' in loader.compiled.steps[0].segments[0].html
++
++
++def test_ref_que_escapa_de_la_actividad_es_insegura(make_activity):
++    """(b) ../../fuera/... escapa de la raíz → RECURSO_RUTA_INSEGURA."""
++    steps = {"01-a.md": STEP.format(sid="a", body="![mal](../../fuera/img.png)")}
++    loader = load_project(make_activity(steps))
++    assert any(i.code == "RECURSO_RUTA_INSEGURA" for i in loader.report.errors)
++
++
++def test_ref_relativa_inexistente_es_ausente(make_activity):
++    """(c) resuelve dentro pero no existe → RECURSO_AUSENTE."""
++    steps = {"01-a.md": STEP.format(sid="a", body="![no](../recursos/no-esta.png)")}
++    loader = load_project(make_activity(steps))
++    assert any(i.code == "RECURSO_AUSENTE" for i in loader.report.errors)
++
++
++def test_convencion_antigua_funciona_con_aviso(make_activity):
++    """(d) 'recursos/x' desde pasos/ (convención antigua) → válida + warning."""
++    steps = {"01-a.md": STEP.format(sid="a", body="![topo](recursos/img.svg)")}
++    root = make_activity(steps)
++    (root / "recursos" / "img.svg").write_text("<svg/>", encoding="utf-8")
++    loader = load_project(root)
++    assert loader.report.ok
++    avisos = [i for i in loader.report.warnings if i.code == "RECURSO_CONVENCION_OBSOLETA"]
++    assert len(avisos) == 1 and "../recursos/img.svg" in str(avisos[0])
++    # La salida queda normalizada igual que con la convención nueva
++    assert 'src="recursos/img.svg"' in loader.compiled.steps[0].segments[0].html
++
++
++def test_recurso_dentro_de_la_actividad_pero_fuera_de_recursos(make_activity):
++    """Existe y no escapa, pero no viajaría a la publicación → error claro."""
++    steps = {
++        "01-a.md": STEP.format(sid="a", body="![suelta](../pasos/suelta.png)"),
++    }
++    root = make_activity(steps)
++    (root / "pasos" / "suelta.png").write_bytes(b"png")
++    loader = load_project(root)
++    assert any(i.code == "RECURSO_FUERA_DE_RECURSOS" for i in loader.report.errors)
+diff --git a/tests/python/test_publish.py b/tests/python/test_publish.py
+index f46e39c..a068188 100644
+--- a/tests/python/test_publish.py
++++ b/tests/python/test_publish.py
+@@ -241,3 +241,24 @@ def test_borrador_roto_sigue_bloqueando_el_catalogo(tmp_path):
+     report, site = publish(source, output=tmp_path / "_site", clean=True)
+     assert site is None
+     assert any(i.code == "PUBLICACION_ACTIVIDAD_INVALIDA" for i in report.errors)
++
++
++def test_html_publicado_enlaza_recursos_escritos_con_ruta_relativa_al_paso(tmp_path):
++    """(e) el autor escribe ../recursos/... y el sitio publicado enlaza bien."""
++    source = _make_source(tmp_path, ["con-recurso"])
++    root = source / "con-recurso"
++    (root / "recursos" / "diagrama.svg").write_text("<svg/>", encoding="utf-8")
++    (root / "pasos" / "01-presentacion.md").write_text(
++        "---\nid: presentacion\ntitulo: Presentación\n---\n\n"
++        "![diagrama](../recursos/diagrama.svg)\n\n"
++        "Descarga la [plantilla](../recursos/diagrama.svg).\n",
++        encoding="utf-8",
++    )
++    _, site = publish(source, output=tmp_path / "_site", clean=True)
++    assert site is not None
++    activity_json = (site / "con-recurso" / "activity.json").read_text(encoding="utf-8")
++    # Normalizadas a la raíz del dist, independientemente de cómo se escribieran
++    assert 'src=\\"recursos/diagrama.svg\\"' in activity_json
++    assert "../recursos" not in activity_json
++    # Y el archivo enlazado existe físicamente en la publicación
++    assert (site / "con-recurso" / "recursos" / "diagrama.svg").is_file()
+diff --git a/uv.lock b/uv.lock
+index fce7201..9b9f9fa 100644
+--- a/uv.lock
++++ b/uv.lock
+@@ -80,7 +80,7 @@ wheels = [
+ 
+ [[package]]
+ name = "aulastep"
+-version = "0.8.1"
++version = "0.9.0"
+ source = { editable = "." }
+ dependencies = [
+     { name = "jinja2" },
