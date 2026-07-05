@@ -10,3 +10,4 @@ _site/
 .mypy_cache/
 playwright-report/
 test-results/
+*:Zone.Identifier
